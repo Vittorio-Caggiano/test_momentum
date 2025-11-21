@@ -16,30 +16,8 @@ jobs:
         include:
 
           ############################################################
-          # LINUX x86_64 (Ubuntu 20.04 / 22.04 / 24.04)
+          # LINUX x86_64 (Ubuntu 22.04 / 24.04)
           ############################################################
-
-          # --- Ubuntu 20.04 ---
-          - arch: x86_64
-            os: linux
-            os_version: ubuntu-20.04
-            runner: ubuntu-20.04
-            tool: pip
-          - arch: x86_64
-            os: linux
-            os_version: ubuntu-20.04
-            runner: ubuntu-20.04
-            tool: uv
-          - arch: x86_64
-            os: linux
-            os_version: ubuntu-20.04
-            runner: ubuntu-20.04
-            tool: conda
-          - arch: x86_64
-            os: linux
-            os_version: ubuntu-20.04
-            runner: ubuntu-20.04
-            tool: pixi
 
           # --- Ubuntu 22.04 ---
           - arch: x86_64
@@ -86,7 +64,7 @@ jobs:
             tool: pixi
 
           ############################################################
-          # LINUX ARM64
+          # LINUX ARM64 (Ubuntu 24.04 ARM)
           ############################################################
           - arch: arm64
             os: linux
@@ -110,29 +88,8 @@ jobs:
             tool: pixi
 
           ############################################################
-          # macOS Intel (12 / 13)
+          # macOS Intel (macOS 13)
           ############################################################
-          - arch: x86_64
-            os: macos
-            os_version: macos-12
-            runner: macos-12
-            tool: pip
-          - arch: x86_64
-            os: macos
-            os_version: macos-12
-            runner: macos-12
-            tool: uv
-          - arch: x86_64
-            os: macos
-            os_version: macos-12
-            runner: macos-12
-            tool: conda
-          - arch: x86_64
-            os: macos
-            os_version: macos-12
-            runner: macos-12
-            tool: pixi
-
           - arch: x86_64
             os: macos
             os_version: macos-13
@@ -155,7 +112,7 @@ jobs:
             tool: pixi
 
           ############################################################
-          # macOS arm64 (Apple Silicon)
+          # macOS ARM64 (macOS 14)
           ############################################################
           - arch: arm64
             os: macos
@@ -179,7 +136,7 @@ jobs:
             tool: pixi
 
           ############################################################
-          # WINDOWS x86_64 (pip & uv only)
+          # WINDOWS x86_64 (pip + uv only)
           ############################################################
           - arch: x86_64
             os: windows
@@ -197,7 +154,7 @@ jobs:
         uses: actions/checkout@v4
 
       ################################################################
-      # CACHES
+      # CACHING
       ################################################################
 
       - name: pip cache
@@ -229,10 +186,10 @@ jobs:
           key: pixi-${{ runner.os }}-${{ runner.arch }}
 
       ################################################################
-      # Test tools 
+      # Install & test tools
       ################################################################
 
-      ## pip
+      ### pip
       - name: Test pip install
         if: matrix.tool == 'pip'
         run: |
@@ -240,7 +197,7 @@ jobs:
           pip install pymomentum-cpu
           python -c "import pymomentum"
 
-      ## uv
+      ### uv
       - name: Install uv
         if: matrix.tool == 'uv'
         run: |
@@ -253,7 +210,7 @@ jobs:
           uv add pymomentum-cpu
           uv run python -c "import pymomentum"
 
-      ## pixi
+      ### pixi
       - name: Install pixi
         if: matrix.tool == 'pixi' && runner.os != 'Windows'
         run: |
@@ -268,7 +225,7 @@ jobs:
           pixi add pymomentum
           pixi run python -c "import pymomentum"
 
-      ## conda
+      ### conda
       - name: Install Miniconda
         if: matrix.tool == 'conda' && runner.os != 'Windows'
         uses: conda-incubator/setup-miniconda@v3
