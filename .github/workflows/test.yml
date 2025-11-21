@@ -7,102 +7,188 @@ on:
 
 jobs:
   install-test:
-    name: ${{ matrix.tool }} on ${{ matrix.os }} (${{ matrix.arch }})
+    name: ${{ matrix.arch }} → ${{ matrix.os }}:${{ matrix.os_version }} → ${{ matrix.tool }}
     runs-on: ${{ matrix.runner }}
+
     strategy:
       fail-fast: false
       matrix:
         include:
-          # -----------------------------
-          # Linux (x86_64)
-          # -----------------------------
-          - os: linux
-            arch: x86_64
-            runner: ubuntu-latest
-            tool: pip
-          - os: linux
-            arch: x86_64
-            runner: ubuntu-latest
-            tool: uv
-          - os: linux
-            arch: x86_64
-            runner: ubuntu-latest
-            tool: pixi
-          - os: linux
-            arch: x86_64
-            runner: ubuntu-latest
-            tool: conda
 
-          # -----------------------------
-          # Linux (aarch64)
-          # -----------------------------
-          - os: linux
-            arch: aarch64
+          ############################################################
+          # LINUX x86_64 (Ubuntu 20.04 / 22.04 / 24.04)
+          ############################################################
+
+          # --- Ubuntu 20.04 ---
+          - arch: x86_64
+            os: linux
+            os_version: ubuntu-20.04
+            runner: ubuntu-20.04
+            tool: pip
+          - arch: x86_64
+            os: linux
+            os_version: ubuntu-20.04
+            runner: ubuntu-20.04
+            tool: uv
+          - arch: x86_64
+            os: linux
+            os_version: ubuntu-20.04
+            runner: ubuntu-20.04
+            tool: conda
+          - arch: x86_64
+            os: linux
+            os_version: ubuntu-20.04
+            runner: ubuntu-20.04
+            tool: pixi
+
+          # --- Ubuntu 22.04 ---
+          - arch: x86_64
+            os: linux
+            os_version: ubuntu-22.04
+            runner: ubuntu-22.04
+            tool: pip
+          - arch: x86_64
+            os: linux
+            os_version: ubuntu-22.04
+            runner: ubuntu-22.04
+            tool: uv
+          - arch: x86_64
+            os: linux
+            os_version: ubuntu-22.04
+            runner: ubuntu-22.04
+            tool: conda
+          - arch: x86_64
+            os: linux
+            os_version: ubuntu-22.04
+            runner: ubuntu-22.04
+            tool: pixi
+
+          # --- Ubuntu 24.04 ---
+          - arch: x86_64
+            os: linux
+            os_version: ubuntu-24.04
+            runner: ubuntu-24.04
+            tool: pip
+          - arch: x86_64
+            os: linux
+            os_version: ubuntu-24.04
+            runner: ubuntu-24.04
+            tool: uv
+          - arch: x86_64
+            os: linux
+            os_version: ubuntu-24.04
+            runner: ubuntu-24.04
+            tool: conda
+          - arch: x86_64
+            os: linux
+            os_version: ubuntu-24.04
+            runner: ubuntu-24.04
+            tool: pixi
+
+          ############################################################
+          # LINUX ARM64
+          ############################################################
+          - arch: arm64
+            os: linux
+            os_version: ubuntu-24.04-arm
             runner: ubuntu-24.04-arm
             tool: pip
-          - os: linux
-            arch: aarch64
+          - arch: arm64
+            os: linux
+            os_version: ubuntu-24.04-arm
             runner: ubuntu-24.04-arm
             tool: uv
-          - os: linux
-            arch: aarch64
-            runner: ubuntu-24.04-arm
-            tool: pixi
-          - os: linux
-            arch: aarch64
+          - arch: arm64
+            os: linux
+            os_version: ubuntu-24.04-arm
             runner: ubuntu-24.04-arm
             tool: conda
+          - arch: arm64
+            os: linux
+            os_version: ubuntu-24.04-arm
+            runner: ubuntu-24.04-arm
+            tool: pixi
 
-          # -----------------------------
-          # macOS (Intel)
-          # -----------------------------
-          - os: macos
-            arch: x86_64
+          ############################################################
+          # macOS Intel (12 / 13)
+          ############################################################
+          - arch: x86_64
+            os: macos
+            os_version: macos-12
+            runner: macos-12
+            tool: pip
+          - arch: x86_64
+            os: macos
+            os_version: macos-12
+            runner: macos-12
+            tool: uv
+          - arch: x86_64
+            os: macos
+            os_version: macos-12
+            runner: macos-12
+            tool: conda
+          - arch: x86_64
+            os: macos
+            os_version: macos-12
+            runner: macos-12
+            tool: pixi
+
+          - arch: x86_64
+            os: macos
+            os_version: macos-13
             runner: macos-13
             tool: pip
-          - os: macos
-            arch: x86_64
+          - arch: x86_64
+            os: macos
+            os_version: macos-13
             runner: macos-13
             tool: uv
-          - os: macos
-            arch: x86_64
-            runner: macos-13
-            tool: pixi
-          - os: macos
-            arch: x86_64
+          - arch: x86_64
+            os: macos
+            os_version: macos-13
             runner: macos-13
             tool: conda
+          - arch: x86_64
+            os: macos
+            os_version: macos-13
+            runner: macos-13
+            tool: pixi
 
-          # -----------------------------
-          # macOS (arm64)
-          # -----------------------------
-          - os: macos
-            arch: arm64
+          ############################################################
+          # macOS arm64 (Apple Silicon)
+          ############################################################
+          - arch: arm64
+            os: macos
+            os_version: macos-14
             runner: macos-latest
             tool: pip
-          - os: macos
-            arch: arm64
+          - arch: arm64
+            os: macos
+            os_version: macos-14
             runner: macos-latest
             tool: uv
-          - os: macos
-            arch: arm64
-            runner: macos-latest
-            tool: pixi
-          - os: macos
-            arch: arm64
+          - arch: arm64
+            os: macos
+            os_version: macos-14
             runner: macos-latest
             tool: conda
+          - arch: arm64
+            os: macos
+            os_version: macos-14
+            runner: macos-latest
+            tool: pixi
 
-          # -----------------------------
-          # Windows (x86_64)
-          # Only pip & uv for now
-          # -----------------------------
-          - os: windows
-            arch: x86_64
+          ############################################################
+          # WINDOWS x86_64 (pip & uv only)
+          ############################################################
+          - arch: x86_64
+            os: windows
+            os_version: windows-2022
             runner: windows-latest
             tool: pip
-          - os: windows
-            arch: x86_64
+          - arch: x86_64
+            os: windows
+            os_version: windows-2022
             runner: windows-latest
             tool: uv
 
@@ -110,26 +196,51 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      # Install Python for pip/uv
-      - name: Set up Python
-        if: matrix.tool == 'pip' || matrix.tool == 'uv'
+      ################################################################
+      # CACHES
+      ################################################################
+
+      - name: pip cache
+        if: matrix.tool == 'pip'
         uses: actions/setup-python@v5
         with:
           python-version: "3.11"
+          cache: "pip"
 
-      # -----------------------------
-      # pip test
-      # -----------------------------
+      - name: uv cache
+        if: matrix.tool == 'uv'
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/uv
+          key: uv-${{ runner.os }}-${{ runner.arch }}
+
+      - name: conda cache
+        if: matrix.tool == 'conda' && runner.os != 'Windows'
+        uses: actions/cache@v4
+        with:
+          path: ~/conda/pkgs
+          key: conda-${{ runner.os }}-${{ runner.arch }}
+
+      - name: pixi cache
+        if: matrix.tool == 'pixi' && runner.os != 'Windows'
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/pixi
+          key: pixi-${{ runner.os }}-${{ runner.arch }}
+
+      ################################################################
+      # Test tools 
+      ################################################################
+
+      ## pip
       - name: Test pip install
         if: matrix.tool == 'pip'
         run: |
-          python -m pip install --upgrade pip
+          python -m pip install -U pip
           pip install pymomentum-cpu
           python -c "import pymomentum"
 
-      # -----------------------------
-      # uv test
-      # -----------------------------
+      ## uv
       - name: Install uv
         if: matrix.tool == 'uv'
         run: |
@@ -142,9 +253,7 @@ jobs:
           uv add pymomentum-cpu
           uv run python -c "import pymomentum"
 
-      # -----------------------------
-      # pixi test
-      # -----------------------------
+      ## pixi
       - name: Install pixi
         if: matrix.tool == 'pixi' && runner.os != 'Windows'
         run: |
@@ -159,15 +268,13 @@ jobs:
           pixi add pymomentum
           pixi run python -c "import pymomentum"
 
-      # -----------------------------
-      # conda test
-      # -----------------------------
-      - name: Set up Miniconda
+      ## conda
+      - name: Install Miniconda
         if: matrix.tool == 'conda' && runner.os != 'Windows'
         uses: conda-incubator/setup-miniconda@v3
         with:
           activate-environment: test
-          auto-update-conda: true
+          auto-update-conda: false
           python-version: "3.11"
 
       - name: Test conda install
