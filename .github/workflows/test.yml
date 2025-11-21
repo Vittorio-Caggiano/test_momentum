@@ -1,4 +1,4 @@
-name: Test pymomentum-cpu Installation
+name: Test pymomentum Installation
 
 on:
   push:
@@ -6,87 +6,172 @@ on:
   workflow_dispatch:
 
 jobs:
-  test-install:
-    name: Test Install (${{ matrix.os }} – ${{ matrix.arch }})
+  install-test:
+    name: ${{ matrix.tool }} on ${{ matrix.os }} (${{ matrix.arch }})
     runs-on: ${{ matrix.runner }}
     strategy:
       fail-fast: false
       matrix:
         include:
-          # ---- Linux ----
+          # -----------------------------
+          # Linux (x86_64)
+          # -----------------------------
           - os: linux
             arch: x86_64
             runner: ubuntu-latest
+            tool: pip
+          - os: linux
+            arch: x86_64
+            runner: ubuntu-latest
+            tool: uv
+          - os: linux
+            arch: x86_64
+            runner: ubuntu-latest
+            tool: pixi
+          - os: linux
+            arch: x86_64
+            runner: ubuntu-latest
+            tool: conda
 
+          # -----------------------------
+          # Linux (aarch64)
+          # -----------------------------
           - os: linux
             arch: aarch64
             runner: ubuntu-24.04-arm
+            tool: pip
+          - os: linux
+            arch: aarch64
+            runner: ubuntu-24.04-arm
+            tool: uv
+          - os: linux
+            arch: aarch64
+            runner: ubuntu-24.04-arm
+            tool: pixi
+          - os: linux
+            arch: aarch64
+            runner: ubuntu-24.04-arm
+            tool: conda
 
-          # ---- macOS ----
+          # -----------------------------
+          # macOS (Intel)
+          # -----------------------------
           - os: macos
             arch: x86_64
-            runner: macos-13   # Intel
-          
+            runner: macos-13
+            tool: pip
+          - os: macos
+            arch: x86_64
+            runner: macos-13
+            tool: uv
+          - os: macos
+            arch: x86_64
+            runner: macos-13
+            tool: pixi
+          - os: macos
+            arch: x86_64
+            runner: macos-13
+            tool: conda
+
+          # -----------------------------
+          # macOS (arm64)
+          # -----------------------------
           - os: macos
             arch: arm64
-            runner: macos-latest # Apple Silicon
+            runner: macos-latest
+            tool: pip
+          - os: macos
+            arch: arm64
+            runner: macos-latest
+            tool: uv
+          - os: macos
+            arch: arm64
+            runner: macos-latest
+            tool: pixi
+          - os: macos
+            arch: arm64
+            runner: macos-latest
+            tool: conda
 
-          # ---- Windows ----
+          # -----------------------------
+          # Windows (x86_64)
+          # Only pip & uv for now
+          # -----------------------------
           - os: windows
             arch: x86_64
             runner: windows-latest
+            tool: pip
+          - os: windows
+            arch: x86_64
+            runner: windows-latest
+            tool: uv
 
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      # -------------------------------
-      #   Python Setup
-      # -------------------------------
+      # Install Python for pip/uv
       - name: Set up Python
+        if: matrix.tool == 'pip' || matrix.tool == 'uv'
         uses: actions/setup-python@v5
         with:
           python-version: "3.11"
 
-      # -------------------------------
-      #   Test PIP / UV installation
-      # -------------------------------
+      # -----------------------------
+      # pip test
+      # -----------------------------
+      - name: Test pip install
+        if: matrix.tool == 'pip'
+        run: |
+          python -m pip install --upgrade pip
+          pip install pymomentum-cpu
+          python -c "import pymomentum"
+
+      # -----------------------------
+      # uv test
+      # -----------------------------
       - name: Install uv
+        if: matrix.tool == 'uv'
         run: |
           curl -LsSf https://astral.sh/uv/install.sh | sh
           echo "$HOME/.cargo/bin" >> $GITHUB_PATH
 
       - name: Test uv install
-        run: uv add pymomentum-cpu
+        if: matrix.tool == 'uv'
+        run: |
+          uv add pymomentum-cpu
+          uv run python -c "import pymomentum"
 
-      - name: Test pip install
-        run: pip install pymomentum-cpu
-
-      # -------------------------------
-      #   Conda / Pixi Installation
-      #   (skip on Windows ARM etc)
-      # -------------------------------
-      - name: Install Pixi
-        if: runner.os != 'Windows'
+      # -----------------------------
+      # pixi test
+      # -----------------------------
+      - name: Install pixi
+        if: matrix.tool == 'pixi' && runner.os != 'Windows'
         run: |
           curl -fsSL https://pixi.sh/install.sh | bash
           echo "$HOME/.pixi/bin" >> $GITHUB_PATH
 
-      - name: Test pixi installation
-        if: runner.os != 'Windows'
+      - name: Test pixi install
+        if: matrix.tool == 'pixi' && runner.os != 'Windows'
         run: |
-          pixi init test-env
-          cd test-env
+          pixi init env
+          cd env
           pixi add pymomentum
+          pixi run python -c "import pymomentum"
 
-      - name: Set up Conda
-        if: runner.os != 'Windows'
+      # -----------------------------
+      # conda test
+      # -----------------------------
+      - name: Set up Miniconda
+        if: matrix.tool == 'conda' && runner.os != 'Windows'
         uses: conda-incubator/setup-miniconda@v3
         with:
+          activate-environment: test
           auto-update-conda: true
           python-version: "3.11"
 
       - name: Test conda install
-        if: runner.os != 'Windows'
+        if: matrix.tool == 'conda' && runner.os != 'Windows'
         run: |
           conda install -c conda-forge pymomentum -y
+          python -c "import pymomentum"
