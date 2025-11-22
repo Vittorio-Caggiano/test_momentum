@@ -1,0 +1,244 @@
+name: Test pymomentum Installation
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+env:
+  MHR_GIT_REF: "ci_ubuntu_22.04"
+
+  # Git URL pattern used across all tools
+  MHR_GIT_URL: "git+https://github.com/facebookresearch/MHR.git@${{ env.MHR_GIT_REF }}"
+
+jobs:
+  install-test:
+    name: ${{ matrix.arch }} → ${{ matrix.os }}:${{ matrix.os_version }} → ${{ matrix.tool }}
+    runs-on: ${{ matrix.runner }}
+
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+
+          ############################################################
+          # LINUX x86_64 (Ubuntu 22.04 / 24.04)
+          ############################################################
+          - arch: x86_64
+            os: linux
+            os_version: ubuntu-22.04
+            runner: ubuntu-22.04
+            tool: pip
+          - arch: x86_64
+            os: linux
+            os_version: ubuntu-22.04
+            runner: ubuntu-22.04
+            tool: uv
+          - arch: x86_64
+            os: linux
+            os_version: ubuntu-22.04
+            runner: ubuntu-22.04
+            tool: conda
+          - arch: x86_64
+            os: linux
+            os_version: ubuntu-22.04
+            runner: ubuntu-22.04
+            tool: pixi
+
+          - arch: x86_64
+            os: linux
+            os_version: ubuntu-24.04
+            runner: ubuntu-24.04
+            tool: pip
+          - arch: x86_64
+            os: linux
+            os_version: ubuntu-24.04
+            runner: ubuntu-24.04
+            tool: uv
+          - arch: x86_64
+            os: linux
+            os_version: ubuntu-24.04
+            runner: ubuntu-24.04
+            tool: conda
+          - arch: x86_64
+            os: linux
+            os_version: ubuntu-24.04
+            runner: ubuntu-24.04
+            tool: pixi
+
+          ############################################################
+          # LINUX ARM64 (Ubuntu 24.04 ARM)
+          ############################################################
+          - arch: arm64
+            os: linux
+            os_version: ubuntu-24.04-arm
+            runner: ubuntu-24.04-arm
+            tool: pip
+          - arch: arm64
+            os: linux
+            os_version: ubuntu-24.04-arm
+            runner: ubuntu-24.04-arm
+            tool: uv
+          - arch: arm64
+            os: linux
+            os_version: ubuntu-24.04-arm
+            runner: ubuntu-24.04-arm
+            tool: conda
+          - arch: arm64
+            os: linux
+            os_version: ubuntu-24.04-arm
+            runner: ubuntu-24.04-arm
+            tool: pixi
+
+          ############################################################
+          # macOS Intel (macOS 13)
+          ############################################################
+          - arch: x86_64
+            os: macos
+            os_version: macos-13
+            runner: macos-13
+            tool: pip
+          - arch: x86_64
+            os: macos
+            os_version: macos-13
+            runner: macos-13
+            tool: uv
+          - arch: x86_64
+            os: macos
+            os_version: macos-13
+            runner: macos-13
+            tool: conda
+          - arch: x86_64
+            os: macos
+            os_version: macos-13
+            runner: macos-13
+            tool: pixi
+
+          ############################################################
+          # macOS ARM64 (macOS 14)
+          ############################################################
+          - arch: arm64
+            os: macos
+            os_version: macos-14
+            runner: macos-latest
+            tool: pip
+          - arch: arm64
+            os: macos
+            os_version: macos-14
+            runner: macos-latest
+            tool: uv
+          - arch: arm64
+            os: macos
+            os_version: macos-14
+            runner: macos-latest
+            tool: conda
+          - arch: arm64
+            os: macos
+            os_version: macos-14
+            runner: macos-latest
+            tool: pixi
+
+          ############################################################
+          # WINDOWS x86_64 (pip + uv only)
+          ############################################################
+          - arch: x86_64
+            os: windows
+            os_version: windows-2022
+            runner: windows-latest
+            tool: pip
+          - arch: x86_64
+            os: windows
+            os_version: windows-2022
+            runner: windows-latest
+            tool: uv
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      ################################################################
+      # CACHING
+      ################################################################
+
+      - name: pip cache
+        if: matrix.tool == 'pip'
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: "pip"
+
+      - name: uv cache
+        if: matrix.tool == 'uv'
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/uv
+          key: uv-${{ runner.os }}-${{ runner.arch }}
+
+      - name: conda cache
+        if: matrix.tool == 'conda' && runner.os != 'Windows'
+        uses: actions/cache@v4
+        with:
+          path: ~/conda/pkgs
+          key: conda-${{ runner.os }}-${{ runner.arch }}
+
+      - name: pixi cache
+        if: matrix.tool == 'pixi' && runner.os != 'Windows'
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/pixi
+          key: pixi-${{ runner.os }}-${{ runner.arch }}
+
+      ################################################################
+      # Install & test tools (Git install from single variable)
+      ################################################################
+
+      ### pip
+      - name: Test pip install
+        if: matrix.tool == 'pip'
+        run: |
+          python -m pip install -U pip
+          pip install "${{ env.MHR_GIT_URL }}"
+          python -c "import pymomentum"
+
+      ### uv
+      - name: Install uv
+        if: matrix.tool == 'uv'
+        run: |
+          curl -LsSf https://astral.sh/uv/install.sh | sh
+          echo "$HOME/.cargo/bin" >> $GITHUB_PATH
+
+      - name: Test uv install
+        if: matrix.tool == 'uv'
+        run: |
+          uv add "${{ env.MHR_GIT_URL }}"
+          uv run python -c "import pymomentum"
+
+      ### pixi
+      - name: Install pixi
+        if: matrix.tool == 'pixi' && runner.os != 'Windows'
+        run: |
+          curl -fsSL https://pixi.sh/install.sh | bash
+          echo "$HOME/.pixi/bin" >> $GITHUB_PATH
+
+      - name: Test pixi install
+        if: matrix.tool == 'pixi' && runner.os != 'Windows'
+        run: |
+          pixi init env
+          cd env
+          pixi add "pip:${{ env.MHR_GIT_URL }}"
+          pixi run python -c "import pymomentum"
+
+      ### conda
+      - name: Install Miniconda
+        if: matrix.tool == 'conda' && runner.os != 'Windows'
+        uses: conda-incubator/setup-miniconda@v3
+        with:
+          activate-environment: test
+          auto-update-conda: false
+          python-version: "3.11"
+
+      - name: Test conda install (pip-install from Git)
+        if: matrix.tool == 'conda' && runner.os != 'Windows'
+        run: |
+          pip install "${{ env.MHR_GIT_URL }}"
+          python -c "import pymomentum"
