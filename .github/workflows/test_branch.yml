@@ -7,7 +7,7 @@ on:
 
 env:
   # >>> Change the branch here <<<
-  MHR_GIT_REF: "ci_ubuntu_22.04"
+  MHR_GIT_REF: "main"
 
 jobs:
   install-test:
